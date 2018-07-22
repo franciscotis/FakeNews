@@ -5,13 +5,13 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import model.Noticia;
 
 public class BaseDeDados
 {
-	private ArrayList<Noticia> noticias;
+	private HashMap<Integer, Noticia> noticias;
 	private String comentarios = "";
 	private String pathDados;
 
@@ -23,7 +23,7 @@ public class BaseDeDados
 	public BaseDeDados(String pathDados)
 	{
 		this.pathDados = pathDados;
-		noticias = new ArrayList<>();
+		noticias = new HashMap<>();
 		lerArquivo(pathDados);
 	}
 
@@ -54,7 +54,7 @@ public class BaseDeDados
 					noticia.setMediaAvaliacoes(Double.parseDouble(atributos[3])); // O quanto o preço 
 					noticia.setFake(Boolean.parseBoolean(atributos[4]));
 					
-					noticias.add(noticia);
+					noticias.put(new Integer(noticia.getId()), noticia);
 				}
 				else
 					comentarios += linha + '\n';
@@ -116,7 +116,7 @@ public class BaseDeDados
 	 * 
 	 * @return
 	 */
-	public ArrayList<Noticia> getNoticias()
+	public HashMap<Integer, Noticia> getNoticias()
 	{
 		return noticias;
 	}
@@ -131,7 +131,7 @@ public class BaseDeDados
 
 		builder.append(comentarios);
 
-		for(Noticia noticia : noticias)
+		for(Noticia noticia : noticias.values())
 		{
 			builder.append(noticia.toString());
 		}

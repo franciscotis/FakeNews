@@ -35,5 +35,8 @@ public class Servidor
 		this.ip = ip;
 	}
 	
-	
+	public String toString()
+	{
+		return ip + ";" + porta;
+	}
 }
