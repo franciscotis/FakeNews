@@ -23,7 +23,6 @@ public class Consenso
 	
 	public void iniciarConsenso()
 	{
-		System.out.println("Timeout: " + timeout);
 		System.out.println("Iniciou processo de consenso");
 		//TODO Após o consenso setar se a noticia foi considerada fake 
 		//TODO noticia.setFake(resultadoConsenso);
