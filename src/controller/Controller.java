@@ -18,7 +18,7 @@ public class Controller
 	private BaseDeDados baseDados;
 	private Semaphore semaforoNoticias;
 	private int timeout;
-	
+
 	public Controller(String pathDados)
 	{
 		executor = Executors.newCachedThreadPool();
@@ -27,28 +27,37 @@ public class Controller
 		timeout = Integer.parseInt(configuracao.getConfiguracao("timeout"));
 		semaforoNoticias = new Semaphore(0);
 	}
-	
+
 	public Noticia[] listarNoticias()
 	{
 		Noticia[] noticias = new Noticia[baseDados.getNoticias().size()];
-		
+
 		int i  = 0;
-		
+
 		for(Noticia n : baseDados.getNoticias().values())
 			noticias[i++] = n;
-		
+
 		return noticias;
 	}
-	
+
 	public void addAvaliacao(Noticia noticia, int avaliacao)
 	{
 		noticia.addAvaliacao(avaliacao);
+		atualizarInformacoes();
+		
+		if(noticia.oldIsFake() != noticia.isFake()) // Só executa o processo de consenso se a avaliação sobre a notícia mudou
+			iniciarConsenso(noticia);
+	}
+
+	private void iniciarConsenso(Noticia noticia)
+	{
+
 		Consenso consenso = new Consenso(noticia, configuracao.outrosServidores(), timeout);
-		consenso.setEventoPosConsenso(() -> executarPosConsenso());
+		consenso.setEventoPosConsenso(() -> atualizarInformacoes());
 		executor.execute(() -> consenso.iniciarConsenso()); // Inicia um thread para iniciar o processo de consenso
 	}
-	
-	private void executarPosConsenso()
+
+	private void atualizarInformacoes()
 	{
 		baseDados.persistirDados();
 		semaforoNoticias.release();
@@ -57,10 +66,10 @@ public class Controller
 	public List<Noticia> getListaNoticias()
 	{
 		ArrayList<Noticia> noticias = new ArrayList<>();
-		
+
 		for(Noticia n : baseDados.getNoticias().values())
 			noticias.add(n);
-		
+
 		return noticias;
 	}
 
@@ -77,5 +86,5 @@ public class Controller
 			e.printStackTrace();
 		}
 	}
-	
+
 }

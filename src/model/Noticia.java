@@ -15,14 +15,15 @@ public class Noticia
 		MAIORIA = (double) 5 * 2/3;
 	}
 	
-	public boolean isFake()
+	public boolean oldIsFake()
 	{
-		fake = true;
-		
+		return fake;
+	}
+	
+	public boolean isFake()
+	{	
 		if(mediaAvaliacoes < MAIORIA)
 			return true;
-		
-		fake = false;
 		
 		return false;
 	}
