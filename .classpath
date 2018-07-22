@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/matth.sobral/Documents/Uefs/PBL/2018.1/Redes/PBL 4/FakeNews/lib/mail.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
