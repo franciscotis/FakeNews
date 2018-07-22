@@ -19,17 +19,13 @@ import javax.mail.internet.MimeMessage;
  */
 public class EmailSender
 {
-	private Session session;
-	private String emailRemetente;
+	private static Session session;
+	private static String emailRemetente;
 
-	/**
-	 * Método construtor da classe.
-	 * @param email
-	 * @param senha
-	 */
-	public EmailSender(String email, String senha)
+	private static void iniciarSessao()
 	{
-		this.emailRemetente = email;
+		emailRemetente = "inova.fsa@gmail.com";
+		String senha = "inovafsa2018";
 		
 		Properties propriedades = new Properties();
 		
@@ -44,7 +40,7 @@ public class EmailSender
 		{
 			protected PasswordAuthentication getPasswordAuthentication() 
 			{
-				return new PasswordAuthentication(email, senha);
+				return new PasswordAuthentication(emailRemetente, senha);
 			}
 		});
 
@@ -58,8 +54,11 @@ public class EmailSender
 	 * @param destinatario
 	 * @param mensagem
 	 */
-	public void send(String assunto, String destinatario, String mensagem)
+	public static void send(String assunto, String destinatario, String mensagem)
 	{
+		if(session == null)
+			iniciarSessao();
+		
 		try 
 		{
 

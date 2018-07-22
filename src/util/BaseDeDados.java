@@ -133,7 +133,7 @@ public class BaseDeDados
 
 		for(Noticia noticia : noticias.values())
 		{
-			builder.append(noticia.toString());
+			builder.append(noticia.formatarParaBd());
 		}
 
 		return builder.toString();

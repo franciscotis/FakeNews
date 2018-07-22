@@ -7,16 +7,16 @@ public class Noticia
 	private int numeroAvaliacoes;
 	private double mediaAvaliacoes;
 	private boolean fake;
+	private double MAIORIA;
 	
 	
 	public Noticia()
 	{
+		MAIORIA = (double) 5 * 2/3;
 	}
 	
 	public boolean isFake()
 	{
-		double MAIORIA = (double) 5 * 2/3;
-
 		fake = true;
 		
 		if(mediaAvaliacoes < MAIORIA)
@@ -80,7 +80,7 @@ public class Noticia
 		this.fake = fake;
 	}
 	
-	public String toString()
+	public String formatarParaBd()
 	{
 		StringBuilder builder = new StringBuilder();
 		
@@ -96,5 +96,10 @@ public class Noticia
 		builder.append('\n');
 		
 		return builder.toString();
+	}
+	
+	public String toString()
+	{
+		return id + " - " + titulo;
 	}
 }

@@ -3,6 +3,8 @@ package util;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.Servidor;
+
 /**
  * Leitor dos arquivos de configuração da aplicação.
  * Por convenção, os arquivos de configuração do app (conf.yml)
@@ -11,12 +13,12 @@ import java.util.List;
  * @author matth.sobral
  *
  */
-public class Inicializador 
+public class Configuracao 
 {
 	private ArrayList<Servidor> servidores;
 	private LeitorConfiguracoes leitor;
 	
-	public Inicializador()
+	public Configuracao()
 	{
 		String[] configuracoes = { "conf/conf.yml", "conf/servers.yml" };
 		leitor = new LeitorConfiguracoes(configuracoes);
