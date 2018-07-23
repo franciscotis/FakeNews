@@ -1,6 +1,8 @@
 package view;
 
 import java.awt.EventQueue;
+import java.io.IOException;
+import java.rmi.AlreadyBoundException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -44,7 +46,7 @@ public class Principal extends JFrame
 		} 
 		catch(Exception e)
 		{
-			// LookAndFell não encontrada
+			// LookAndFell nï¿½o encontrada
 		}
 		
 		EventQueue.invokeLater(new Runnable() 
@@ -68,7 +70,7 @@ public class Principal extends JFrame
 	 * Create the frame.
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Principal() {
+	public Principal() throws AlreadyBoundException, IOException, InterruptedException {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 375, 400);
 		contentPane = new JPanel();
