@@ -12,7 +12,7 @@ public class Noticia
 	
 	public Noticia()
 	{
-		MAIORIA = (double) 5 * (double) 2/3;
+		MAIORIA = 3.34;
 	}
 	
 	public boolean oldIsFake()

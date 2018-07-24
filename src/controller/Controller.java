@@ -27,7 +27,7 @@ import util.Configuracao;
 public class Controller extends UnicastRemoteObject implements ISiteNoticia
 {
 	private static final long serialVersionUID = -6386698164507342395L;
-	private static double PERCENTUAL_MAIORIA = (double) 2/3;
+	private static double MAIORIA = 3.34;
 	private ExecutorService executor;
 	private Configuracao configuracao;
 	private BaseDeDados baseDados;
@@ -74,11 +74,11 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 	}
 
 	@Override
-	public boolean getAvaliacao(int idNoticia) throws RemoteException // Metodo que ira retornar o a avaliacao local de cada servidor sobre uma noticia
+	public double getMediaAvalicao(int idNoticia) throws RemoteException // Metodo que ira retornar o a avaliacao local de cada servidor sobre uma noticia
 	{
 		HashMap<Integer, Noticia> noticias = this.baseDados.getNoticias();
 		Noticia n = (Noticia) noticias.get(idNoticia);
-		return n.isFake();
+		return n.getMediaAvaliacoes();
 	}
 
 	@Override
@@ -94,21 +94,20 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 	@Override
 	public void consenso(int idNoticia, List<ISiteNoticia> servidores) throws RemoteException
 	{
-		int avaliacoesVerdade = 0;
-		double percentualVerdade = 0;
+		double somatorioMedias = 0;
+		double avaliacaoMedia = 0;
 
 		for (ISiteNoticia site : servidores)
-			if(site.getAvaliacao(idNoticia))
-				avaliacoesVerdade++;
+			somatorioMedias += site.getMediaAvalicao(idNoticia);
 
-		percentualVerdade = (double) avaliacoesVerdade / servidores.size();
+		avaliacaoMedia = (double) somatorioMedias / servidores.size();
 
-		if(percentualVerdade >= PERCENTUAL_MAIORIA)
+		if(avaliacaoMedia >= MAIORIA)
 			for(ISiteNoticia site : servidores)
-				site.definirAvaliacao(idNoticia, (double) PERCENTUAL_MAIORIA * 5); // Foi decido que a notícia é verdadeira
+				site.definirAvaliacao(idNoticia, MAIORIA); // Foi decido que a notícia é verdadeira
 		else
 			for(ISiteNoticia site : servidores)
-				site.definirAvaliacao(idNoticia, (double) 5 - PERCENTUAL_MAIORIA * 5);
+				site.definirAvaliacao(idNoticia, 5 - MAIORIA);
 		
 		System.out.println("A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + " foi considerada " + baseDados.getNoticias().get(idNoticia).oldIsFake());
 	}
