@@ -40,7 +40,7 @@ import util.EmailSender;
 public class Controller extends UnicastRemoteObject implements ISiteNoticia
 {
 	private static final long serialVersionUID = -6386698164507342395L;
-	private static double MAIORIA = 3.34;
+	private static double MAIORIA = 3.33;
 	private ExecutorService executor;
 	private Configuracao configuracao;
 	private BaseDeDados baseDados;
@@ -121,10 +121,10 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 
 		if(avaliacaoMedia >= MAIORIA)
 			for(ISiteNoticia site : servidores)
-				site.definirAvaliacao(idNoticia, MAIORIA); // Foi decido que a not�cia � verdadeira
+				site.definirAvaliacao(idNoticia, 5); // Foi decido que a not�cia � verdadeira
 		else {
 			for (ISiteNoticia site : servidores) {
-				site.definirAvaliacao(idNoticia, 5 - MAIORIA);
+				site.definirAvaliacao(idNoticia, 1);
 				fake = true;
 
 			}
@@ -135,7 +135,7 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 		System.out.println("A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + " foi considerada " + baseDados.getNoticias().get(idNoticia).oldIsFake());
 		if(fake && !baseDados.getNoticias().get(idNoticia).reportado()) {
 			System.out.println("A noticia é fake, reportando as autoridades agora...");
-			EmailSender.send("Foi Reportada uma noticia FAKE", "franncisco.p@gmail.com", "A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + "foi considerada fake");
+			EmailSender.send("Foi Reportada uma noticia FAKE", destinatario, "A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + "foi considerada fake");
 			for(ISiteNoticia site : servidores){
 				site.emailEnviado(idNoticia);
 			}
