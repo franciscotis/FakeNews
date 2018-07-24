@@ -1,33 +1,30 @@
 package model;
 
-import jdk.nashorn.internal.runtime.ECMAException;
+
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
-import java.rmi.server.RMIClientSocketFactory;
-import java.rmi.server.RMISocketFactory;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Semaphore;
 
 public class Consenso 
 {
 	private Noticia noticia;
 	private List<Servidor> servidores;
-	private List<ISiteNoticia> sites;
-	private int timeout;
 	private Evento eventoPosConsenso;
+	private Semaphore semaforoServidores;
 
-	public Consenso(Noticia noticia, List<Servidor> servidores, int timeout)
+	public Consenso(Noticia noticia, List<Servidor> servidores)
 	{
 		this.noticia = noticia;
 		this.servidores = servidores;
-		this.timeout = timeout;
-
+		semaforoServidores = new Semaphore(0);
 	}
 
 	public void setEventoPosConsenso(Evento evento)
@@ -35,49 +32,60 @@ public class Consenso
 		this.eventoPosConsenso = evento;
 	}
 
-	public void iniciarConsenso() throws IOException, NotBoundException {
+	public void iniciarConsenso() throws IOException, NotBoundException, InterruptedException 
+	{
 		System.out.println("Iniciou processo de consenso");
+		
+		ExecutorService executor = Executors.newCachedThreadPool();
+		List<ISiteNoticia> outrosSites = new ArrayList<>();
+		Semaphore semaforoSites = new Semaphore(0);
 
+		semaforoSites.release(); // Libera a primeira permissao para adicao de elementos na lista de sites
+		
+		for(Servidor servidor : servidores) // Solicita conexao com os outros servidores
+			executor.execute(() -> addSiteNoticia(outrosSites, servidor, semaforoSites));
 
-		for(int i=0;i<this.servidores.size();i++){ //MÃ©todo que adiciona em uma lista os servidores em um determinado timeout
-			ISiteNoticia site = (ISiteNoticia) Naming.lookup("rmi://"+this.servidores.get(i).getIp()+":"+String.valueOf(this.servidores.get(i).getPorta())+"/SiteNoticia");
-			try{
-				this.sites.add(site);
-			}catch(Exception e){
-				e.printStackTrace();
-			}
+		semaforoServidores.acquire(servidores.size()); // So executa a segunda parte do código após todos os servidores terem respondido
+		
+		if(outrosSites.size() > 2)
+		{
+			ISiteNoticia siteLider = elegerLider(outrosSites);
+			executarAlgoritmo(siteLider, outrosSites);
+			System.out.println("Processo de consenso finalizado com sucesso");
 		}
-
-		int maximum = this.sites.size();
-		int minimum = 0;
-		int randomNum;
-		Random rand = new Random();
-		randomNum = minimum + rand.nextInt((maximum - minimum) + 1); //Escolha de quem vai realizar o algoritmo
-		ISiteNoticia site = this.sites.get(randomNum);
-		site.consenso(noticia.getId(),this.sites);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		//TODO Apï¿½s o consenso setar se a noticia foi considerada fake
-		//TODO noticia.setFake(resultadoConsenso);
-
-
-		noticia.setFake(noticia.isFake()); //Retirar essa avaliaï¿½ï¿½o
-
-
+		else
+		{
+			System.out.println("Não foram obtidas informações suficientes para executar o algoritmo");
+		}
+	}
+	
+	private ISiteNoticia elegerLider(List<ISiteNoticia> sites)
+	{
+		Random random = new Random();
+		int indiceServidorSorteado = random.nextInt(sites.size());
+		return sites.get(indiceServidorSorteado);
+	}
+	
+	private void executarAlgoritmo(ISiteNoticia siteLider, List<ISiteNoticia> sites) throws RemoteException
+	{
+		siteLider.consenso(noticia.getId(), sites);
 		eventoPosConsenso.disparar();
+	}
+	
+	private void addSiteNoticia(List<ISiteNoticia> sites, Servidor servidor, Semaphore semaforoSites)
+	{
+		try
+		{
+			ISiteNoticia site = (ISiteNoticia) Naming.lookup(servidor.getUrlRmi() + "/SiteNoticia");
+			semaforoSites.acquire();
+			sites.add(site);
+			semaforoSites.release();
+		}
+		catch(Exception e)
+		{
+			System.out.println("Não foi possível se conectar com o servidor: " + servidor.getUrlRmi());
+		}
+		semaforoServidores.release(1);
 	}
 
 }

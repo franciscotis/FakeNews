@@ -35,6 +35,11 @@ public class Servidor
 		this.ip = ip;
 	}
 	
+	public String getUrlRmi()
+	{
+		return "rmi://" + ip + ":" + porta;
+	}
+	
 	public String toString()
 	{
 		return ip + ";" + porta;
