@@ -8,18 +8,28 @@ public class Noticia
 	private double mediaAvaliacoes;
 	private boolean fake;
 	private double MAIORIA;
+	private boolean reportado;
 	
 	
 	public Noticia()
 	{
 		MAIORIA = 3.34;
+		this.reportado = false;
 	}
 	
 	public boolean oldIsFake()
 	{
 		return fake;
 	}
-	
+
+	public void reportar(){
+		this.reportado = true;
+	}
+
+	public boolean reportado(){
+		return this.reportado;
+	}
+
 	public boolean isFake()
 	{	
 		if(mediaAvaliacoes >= MAIORIA)

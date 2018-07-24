@@ -1,3 +1,15 @@
+
+/*
+Autor: Francisco Tito Silva Santos Pereira - 16111203 e Matheus Sobral Oliveira - 16111189
+Componente Curricular: MI - Conectividade e Concorrência
+Concluido em: 24/07/2018
+Declaro que este código foi elaborado por mim de forma individual e não contém nenhum
+trecho de código de outro colega ou de outro autor, tais como provindos de livros e
+apostilas, e páginas ou documentos eletrônicos da Internet. Qualquer trecho de código
+de outra autoria que não a minha está destacado com uma citação para o autor e a fonte
+do código, e estou ciente que estes trechos não serão considerados para fins de avaliação.
+ */
+
 package controller;
 
 import java.io.IOException;
@@ -23,6 +35,7 @@ import model.ISiteNoticia;
 import model.Noticia;
 import util.BaseDeDados;
 import util.Configuracao;
+import util.EmailSender;
 
 public class Controller extends UnicastRemoteObject implements ISiteNoticia
 {
@@ -34,6 +47,7 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 	private Semaphore semaforoNoticias;
 	private int timeout;
 	private int porta;
+	private String destinatario;
 
 
 	public Controller(String pathDados) throws AlreadyBoundException, IOException, InterruptedException {
@@ -41,12 +55,14 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 		configuracao = new Configuracao();
 		baseDados = new BaseDeDados(pathDados);
 		timeout = Integer.parseInt(configuracao.getConfiguracao("timeout"));
+		this.destinatario = String.valueOf(configuracao.getConfiguracao("entidade"));
 		semaforoNoticias = new Semaphore(0);
 		this.alteraTimeOut();
 		this.serverRMI();
 	}
 
-	private void serverRMI() throws IOException, AlreadyBoundException, InterruptedException // Inicia o servi�o RMI
+
+	private void serverRMI() throws IOException, AlreadyBoundException, InterruptedException // Inicia o servi�o RMI
 	{
 		this.porta = this.configuracao.outrosServidores().get(0).getPorta();
 		Registry registry = LocateRegistry.createRegistry(this.porta);
@@ -96,6 +112,7 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 	{
 		double somatorioMedias = 0;
 		double avaliacaoMedia = 0;
+		boolean fake= false;
 
 		for (ISiteNoticia site : servidores)
 			somatorioMedias += site.getMediaAvalicao(idNoticia);
@@ -104,13 +121,32 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 
 		if(avaliacaoMedia >= MAIORIA)
 			for(ISiteNoticia site : servidores)
-				site.definirAvaliacao(idNoticia, MAIORIA); // Foi decido que a not�cia � verdadeira
-		else
-			for(ISiteNoticia site : servidores)
+				site.definirAvaliacao(idNoticia, MAIORIA); // Foi decido que a not�cia � verdadeira
+		else {
+			for (ISiteNoticia site : servidores) {
 				site.definirAvaliacao(idNoticia, 5 - MAIORIA);
+				fake = true;
+
+			}
+
+		}
+
 		
 		System.out.println("A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + " foi considerada " + baseDados.getNoticias().get(idNoticia).oldIsFake());
+		if(!baseDados.getNoticias().get(idNoticia).oldIsFake() && !baseDados.getNoticias().get(idNoticia).reportado()) {
+			System.out.println("A noticia é fake, reportando as autoridades agora...");
+			EmailSender.send("Foi Reportada uma noticia FAKE", this.destinatario, "A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + "foi considerada fake");
+			for(ISiteNoticia site : servidores){
+				site.emailEnviado(idNoticia);
+			}
+		}
 	}
+
+	@Override
+	public void emailEnviado(int idNoticia) throws RemoteException {
+		baseDados.getNoticias().get(idNoticia).reportar();
+	}
+
 
 
 	public Noticia[] listarNoticias()

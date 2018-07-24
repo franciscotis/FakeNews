@@ -9,7 +9,7 @@ import model.Noticia;
 
 
 /**
- * TableModel para uma tabela do consumo de uma residência.
+ * TableModel para uma tabela do consumo de uma residï¿½ncia.
  * 
  * @author matth.sobral
  *
@@ -23,7 +23,7 @@ public class NoticiaTableModel extends AbstractTableModel
 	 *  Array de Strings com o nome das colunas. 
 	 *  
 	 */
-	private String[] colunas = new String[] { "ID", "Título", "Média", "Fake?"};
+	private String[] colunas = new String[] { "ID", "TÃ­tulo", "MÃ©dia", "Fake?"};
 
 
 	/**
@@ -54,20 +54,20 @@ public class NoticiaTableModel extends AbstractTableModel
 	}
 
 	/**
-	 * Retorna o nome da coluna no índice especificado.
-	 * Este método é usado pela JTable para saber o texto do cabeçalho.
+	 * Retorna o nome da coluna no ï¿½ndice especificado.
+	 * Este mï¿½todo ï¿½ usado pela JTable para saber o texto do cabeï¿½alho.
 	 *
 	 */
 	@Override
 	public String getColumnName(int columnIndex) {
-		// Retorna o conteúdo do Array que possui o nome das colunas
-		// no índice especificado.
+		// Retorna o conteï¿½do do Array que possui o nome das colunas
+		// no ï¿½ndice especificado.
 		return colunas[columnIndex];
 	};
 
 	/**
 	 *  Retorna a classe dos elementos da coluna especificada.
-	 * Este método é usado pela JTable na hora de definir o editor da célula.
+	 * Este mï¿½todo ï¿½ usado pela JTable na hora de definir o editor da cï¿½lula.
 	 *
 	 */
 	@Override
@@ -89,8 +89,8 @@ public class NoticiaTableModel extends AbstractTableModel
 	}
 	
 	/**
-	 * Retorna o valor da célula especificada
-	 * pelos índices da linha e da coluna.
+	 * Retorna o valor da cï¿½lula especificada
+	 * pelos ï¿½ndices da linha e da coluna.
 	 * 
 	 */
 	@Override
@@ -99,8 +99,8 @@ public class NoticiaTableModel extends AbstractTableModel
 		Noticia consumo = linhas.get(rowIndex);
 
 		// Retorna o campo referente a coluna especificada.
-		// Aqui é feito um switch para verificar qual é a coluna
-		// e retornar o campo adequado. As colunas são as mesmas
+		// Aqui ï¿½ feito um switch para verificar qual ï¿½ a coluna
+		// e retornar o campo adequado. As colunas sï¿½o as mesmas
 		// que foram especificadas no array "colunas".
 		switch (columnIndex) 
 		{
@@ -118,11 +118,11 @@ public class NoticiaTableModel extends AbstractTableModel
 	}
 
 	/**
-	 * Retorna um valor booleano que define se a célula em questão
-	 * pode ser editada ou não.
-	 * Este método é utilizado pela JTable na hora de definir o editor da célula.
-	 * Neste caso, estará sempre retornando false, não permitindo que nenhuma
-	 * célula seja editada.
+	 * Retorna um valor booleano que define se a cï¿½lula em questï¿½o
+	 * pode ser editada ou nï¿½o.
+	 * Este mï¿½todo ï¿½ utilizado pela JTable na hora de definir o editor da cï¿½lula.
+	 * Neste caso, estarï¿½ sempre retornando false, nï¿½o permitindo que nenhuma
+	 * cï¿½lula seja editada.
 	 */
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) 
@@ -131,7 +131,7 @@ public class NoticiaTableModel extends AbstractTableModel
 	}
 
 	/**
-	 * Adiciona uma lista de sócios ao final dos registros.
+	 * Adiciona uma lista de sï¿½cios ao final dos registros.
 	 */
 	public void setListaDeNoticias(List<Noticia> noticia)
 	{
@@ -143,8 +143,8 @@ public class NoticiaTableModel extends AbstractTableModel
 		
 		linhas = noticia;
 
-		// Reporta a mudança. O JTable recebe a notificação
-		// e se redesenha permitindo que a atualização seja visualizada.
+		// Reporta a mudanï¿½a. O JTable recebe a notificaï¿½ï¿½o
+		// e se redesenha permitindo que a atualizaï¿½ï¿½o seja visualizada.
 		fireTableRowsInserted(noticia.size(), getRowCount() - 1);
 	}
 }

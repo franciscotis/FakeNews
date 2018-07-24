@@ -72,7 +72,7 @@ public class Principal extends JFrame
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Principal() throws AlreadyBoundException, IOException, InterruptedException {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 375, 400);
+		setBounds(100, 100, 500, 400);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -87,12 +87,12 @@ public class Principal extends JFrame
 		contentPane.add(btnAvaliar);
 		
 		noticias = new JComboBox<>(new DefaultComboBoxModel(controller.listarNoticias()));
-		noticias.setBounds(10, 48, 221, 23);
+		noticias.setBounds(10, 48, 300, 23);
 		contentPane.add(noticias);
 		
 		spinner = new JSpinner();
 		spinner.addChangeListener(e -> limitarSpinner());
-		spinner.setBounds(238, 49, 106, 22);
+		spinner.setBounds(350, 49, 50, 22);
 		spinner.setValue(new Integer(1));
 		contentPane.add(spinner);
 		
@@ -104,7 +104,6 @@ public class Principal extends JFrame
 		modelTabela = new NoticiaTableModel();
 		
 		modelTabela.setListaDeNoticias(controller.getListaNoticias());
-		
 		tabela = new JTable(modelTabela);
 		
 		JScrollPane scrollPane = new JScrollPane(tabela);
