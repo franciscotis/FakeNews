@@ -6,20 +6,17 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.rmi.AlreadyBoundException;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.RMIClientSocketFactory;
 import java.rmi.server.RMISocketFactory;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 
 import model.Consenso;
 import model.ISiteNoticia;
@@ -29,6 +26,8 @@ import util.Configuracao;
 
 public class Controller extends UnicastRemoteObject implements ISiteNoticia
 {
+	private static final long serialVersionUID = -6386698164507342395L;
+	private static double MAIORIA = 3.34;
 	private ExecutorService executor;
 	private Configuracao configuracao;
 	private BaseDeDados baseDados;
@@ -45,74 +44,76 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 		semaforoNoticias = new Semaphore(0);
 		this.alteraTimeOut();
 		this.serverRMI();
-
 	}
 
-	private void serverRMI() throws IOException, AlreadyBoundException, InterruptedException { // Método que irá iniciar a conexão rmi
+	private void serverRMI() throws IOException, AlreadyBoundException, InterruptedException // Inicia o servi�o RMI
+	{
 		this.porta = this.configuracao.outrosServidores().get(0).getPorta();
 		Registry registry = LocateRegistry.createRegistry(this.porta);
 		registry.bind("SiteNoticia",this);
-    }
+	}
 
-    private void alteraTimeOut() throws IOException {
-        RMISocketFactory.setSocketFactory(new RMISocketFactory() {
-            public Socket createSocket(String host, int port)
-                    throws IOException, SocketException {
-                Socket socket = new Socket();
-                socket.setSoTimeout(5000);
-                socket.setSoLinger(false, 0);
-                socket.connect(new InetSocketAddress(host, port), 5000);
-                return socket;
-            }
+	private void alteraTimeOut() throws IOException 
+	{
+		RMISocketFactory.setSocketFactory(new RMISocketFactory() {
+			public Socket createSocket(String host, int port)
+					throws IOException, SocketException {
+				Socket socket = new Socket();
+				socket.setSoTimeout(timeout);
+				socket.setSoLinger(false, 0);
+				socket.connect(new InetSocketAddress(host, port), 5000);
+				return socket;
+			}
 
-            public ServerSocket createServerSocket(int port)
-                    throws IOException {
-                return new ServerSocket(port);
-            }
+			public ServerSocket createServerSocket(int port)
+					throws IOException {
+				return new ServerSocket(port);
+			}
 
-        });
-    }
-
-	@Override
-	public boolean getParcial(int idNoticia) throws RemoteException { // Método que irá retornar o resultado parcial de uma noticia
-        Map noticias = this.baseDados.getNoticias();
-		Noticia n = (Noticia) noticias.get(idNoticia);
-		return n.isFake();
+		});
 	}
 
 	@Override
-	public void noticiaFinal(int idNoticia, boolean resultadoFinal) throws RemoteException { // Método que irá dizer qual o resultado final de uma noticia
-		Map noticias = this.baseDados.getNoticias();
+	public double getMediaAvalicao(int idNoticia) throws RemoteException // Metodo que ira retornar o a avaliacao local de cada servidor sobre uma noticia
+	{
+		HashMap<Integer, Noticia> noticias = this.baseDados.getNoticias();
 		Noticia n = (Noticia) noticias.get(idNoticia);
-		n.setFake(resultadoFinal);
+		return n.getMediaAvaliacoes();
+	}
+
+	@Override
+	public void definirAvaliacao(int idNoticia, double mediaFinal) throws RemoteException // Metodo que ira dizer qual o resultado final de uma noticia
+	{ 
+		HashMap<Integer, Noticia> noticias = this.baseDados.getNoticias();
+		Noticia n = (Noticia) noticias.get(idNoticia);
+		n.setMediaAvaliacoes(mediaFinal);
+		atualizarInformacoes();
 	}
 
 
-    @Override
-    public void consenso(int idNoticia, List<ISiteNoticia> servidores) throws RemoteException {
-	    double verdade = 0 , falso = 0 ;
-	    for (ISiteNoticia site : servidores){
-	        if(site.getParcial(idNoticia)){
-	            verdade+=1;
-            }
-            else{
-	            falso+=1;
-            }
-        }
+	@Override
+	public void consenso(int idNoticia, List<ISiteNoticia> servidores) throws RemoteException
+	{
+		double somatorioMedias = 0;
+		double avaliacaoMedia = 0;
 
-        if(verdade>2/3){
-	        for(ISiteNoticia site : servidores){
-	            site.noticiaFinal(idNoticia,true);
-            }
-        }
-        else
-            for(ISiteNoticia site : servidores){
-                site.noticiaFinal(idNoticia,false);
-            }
-    }
+		for (ISiteNoticia site : servidores)
+			somatorioMedias += site.getMediaAvalicao(idNoticia);
+
+		avaliacaoMedia = (double) somatorioMedias / servidores.size();
+
+		if(avaliacaoMedia >= MAIORIA)
+			for(ISiteNoticia site : servidores)
+				site.definirAvaliacao(idNoticia, MAIORIA); // Foi decido que a not�cia � verdadeira
+		else
+			for(ISiteNoticia site : servidores)
+				site.definirAvaliacao(idNoticia, 5 - MAIORIA);
+		
+		System.out.println("A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + " foi considerada " + baseDados.getNoticias().get(idNoticia).oldIsFake());
+	}
 
 
-    public Noticia[] listarNoticias()
+	public Noticia[] listarNoticias()
 	{
 		Noticia[] noticias = new Noticia[baseDados.getNoticias().size()];
 
@@ -128,25 +129,25 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 	{
 		noticia.addAvaliacao(avaliacao);
 		atualizarInformacoes();
-		
-		if(noticia.oldIsFake() != noticia.isFake()) // S� executa o processo de consenso se a avalia��o sobre a not�cia mudou
+
+		if(noticia.oldIsFake() != noticia.isFake()) // So executa o processo de consenso se a avaliacao sobre a noticia mudou
 			iniciarConsenso(noticia);
 	}
 
 	private void iniciarConsenso(Noticia noticia)
 	{
-
-		Consenso consenso = new Consenso(noticia, configuracao.outrosServidores(), timeout);
+		Consenso consenso = new Consenso(noticia, configuracao.outrosServidores());
 		consenso.setEventoPosConsenso(() -> atualizarInformacoes());
 		executor.execute(() -> {
-			try {
+			try 
+			{
 				consenso.iniciarConsenso();
-			} catch (IOException e) {
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
-			} catch (NotBoundException e) {
-                e.printStackTrace();
-            }
-        }); // Inicia um thread para iniciar o processo de consenso
+			}
+		}); // Inicia um thread para iniciar o processo de consenso
 	}
 
 	private void atualizarInformacoes()
@@ -169,15 +170,13 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 	{
 		try
 		{
-			System.out.println("Aguardanto atualiza��o");
+			System.out.println("Aguardanto atualizacao");
 			semaforoNoticias.acquire();
-			System.out.println("As informa��es sobre a noticia foram atualizadas");
+			System.out.println("As informacoes sobre a noticia foram atualizadas");
 		} 
 		catch (InterruptedException e) 
 		{
 			e.printStackTrace();
 		}
 	}
-
-
 }

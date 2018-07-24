@@ -1,5 +1,5 @@
 # Lista de IPs e portas do servidor
 # Ao inserir uma nova consfiguração, certifique-se que não há espaço entre os dois pontos e o valor
-server:192.168.0.9;8080
-server:192.168.0.2;9090
-server:192.168.0.3;3030
+server:localhost;15715
+server:localhost;90901
+server:localhost;99999
