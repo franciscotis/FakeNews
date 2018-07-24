@@ -12,7 +12,7 @@ public class Noticia
 	
 	public Noticia()
 	{
-		MAIORIA = (double) 5 * 2/3;
+		MAIORIA = (double) 5 * (double) 2/3;
 	}
 	
 	public boolean oldIsFake()
@@ -22,10 +22,10 @@ public class Noticia
 	
 	public boolean isFake()
 	{	
-		if(mediaAvaliacoes < MAIORIA)
-			return true;
+		if(mediaAvaliacoes >= MAIORIA)
+			return false;
 		
-		return false;
+		return true;
 	}
 
 	public int getId() 
@@ -74,6 +74,8 @@ public class Noticia
 	public void setMediaAvaliacoes(double mediaAvaliacoes)
 	{
 		this.mediaAvaliacoes = mediaAvaliacoes;
+		setFake(isFake());
+		System.out.println("\nSetando valor. Media" + mediaAvaliacoes +" IsFake: " + isFake());
 	}
 	
 	public void setFake(boolean fake)

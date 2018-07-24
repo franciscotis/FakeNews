@@ -27,7 +27,7 @@ import util.Configuracao;
 public class Controller extends UnicastRemoteObject implements ISiteNoticia
 {
 	private static final long serialVersionUID = -6386698164507342395L;
-	private static double PERCENTUAL_MAIORIA = 2/3;
+	private static double PERCENTUAL_MAIORIA = (double) 2/3;
 	private ExecutorService executor;
 	private Configuracao configuracao;
 	private BaseDeDados baseDados;
@@ -82,11 +82,11 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 	}
 
 	@Override
-	public void definirAvaliacao(int idNoticia, boolean resultadoFinal) throws RemoteException // Metodo que ira dizer qual o resultado final de uma noticia
+	public void definirAvaliacao(int idNoticia, double mediaFinal) throws RemoteException // Metodo que ira dizer qual o resultado final de uma noticia
 	{ 
 		HashMap<Integer, Noticia> noticias = this.baseDados.getNoticias();
 		Noticia n = (Noticia) noticias.get(idNoticia);
-		n.setFake(resultadoFinal);
+		n.setMediaAvaliacoes(mediaFinal);
 		atualizarInformacoes();
 	}
 
@@ -105,12 +105,12 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 
 		if(percentualVerdade >= PERCENTUAL_MAIORIA)
 			for(ISiteNoticia site : servidores)
-				site.definirAvaliacao(idNoticia, true); // Foi decido que a notícia é verdadeira
+				site.definirAvaliacao(idNoticia, (double) PERCENTUAL_MAIORIA * 5); // Foi decido que a notícia é verdadeira
 		else
 			for(ISiteNoticia site : servidores)
-				site.definirAvaliacao(idNoticia, false);
+				site.definirAvaliacao(idNoticia, (double) 5 - PERCENTUAL_MAIORIA * 5);
 		
-		System.out.println("A noticia" + baseDados.getNoticias().get(idNoticia).getTitulo() + "foi consuderada " + baseDados.getNoticias().get(idNoticia).oldIsFake());
+		System.out.println("A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + " foi considerada " + baseDados.getNoticias().get(idNoticia).oldIsFake());
 	}
 
 
@@ -180,6 +180,4 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 			e.printStackTrace();
 		}
 	}
-
-
 }
