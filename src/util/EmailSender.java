@@ -12,14 +12,14 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 /**
- * Envia emails a partir de contas do domínio Gmail.
+ * Envia emails a partir de contas do domï¿½nio Gmail.
  * 
  * @author matth.sobral
  *
  */
 public class EmailSender
 {
-	private static Session session;
+	private static Session session = null;
 	private static String emailRemetente;
 
 	private static void iniciarSessao()
@@ -29,7 +29,7 @@ public class EmailSender
 		
 		Properties propriedades = new Properties();
 		
-		/** Parâmetros de conexão com servidor Gmail */
+		/** Parï¿½metros de conexï¿½o com servidor Gmail */
 		propriedades.put("mail.smtp.host", "smtp.gmail.com");
 		propriedades.put("mail.smtp.socketFactory.port", "465");
 		propriedades.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
@@ -38,13 +38,13 @@ public class EmailSender
 
 		session = Session.getDefaultInstance(propriedades, new javax.mail.Authenticator()
 		{
-			protected PasswordAuthentication getPasswordAuthentication() 
+			protected PasswordAuthentication getPasswordAuthentication()
 			{
 				return new PasswordAuthentication(emailRemetente, senha);
 			}
 		});
 
-		/** Ativa Debug para sessão */
+		/** Ativa Debug para sessï¿½o */
 		session.setDebug(true);
 	}
 	
@@ -65,9 +65,9 @@ public class EmailSender
 			Message message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(emailRemetente)); //Remetente
 
-			Address toUser = new InternetAddress(destinatario); // Destinatário
+			Address toUser = new InternetAddress(destinatario); // Destinatï¿½rio
 
-			message.setRecipient(Message.RecipientType.TO, toUser); // Adiciona o destinatário à mensagem
+			message.setRecipient(Message.RecipientType.TO, toUser); // Adiciona o destinatï¿½rio ï¿½ mensagem
 			message.setSubject(assunto); // Assunto
 			message.setText(mensagem); // Mensagem
 			

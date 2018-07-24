@@ -133,9 +133,9 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 
 		
 		System.out.println("A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + " foi considerada " + baseDados.getNoticias().get(idNoticia).oldIsFake());
-		if(!baseDados.getNoticias().get(idNoticia).oldIsFake() && !baseDados.getNoticias().get(idNoticia).reportado()) {
+		if(fake && !baseDados.getNoticias().get(idNoticia).reportado()) {
 			System.out.println("A noticia é fake, reportando as autoridades agora...");
-			EmailSender.send("Foi Reportada uma noticia FAKE", this.destinatario, "A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + "foi considerada fake");
+			EmailSender.send("Foi Reportada uma noticia FAKE", "franncisco.p@gmail.com", "A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + "foi considerada fake");
 			for(ISiteNoticia site : servidores){
 				site.emailEnviado(idNoticia);
 			}
