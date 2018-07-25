@@ -1,3 +1,14 @@
+/*
+Autores: Francisco Tito Silva Santos Pereira - 16111203 e Matheus Sobral Oliveira - 16111189
+Componente Curricular: MI - Conectividade e Concorrência
+Concluido em: 24/07/2018
+Declaramos que este código foi elaborado por nós de forma "individual" e não contém nenhum
+trecho de código de outro colega ou de outro autor, tais como provindos de livros e
+apostilas, e páginas ou documentos eletrônicos da Internet. Qualquer trecho de código
+de outra autoria que não a nossa está destacado com uma citação para o autor e a fonte
+do código, e estamos ciente que estes trechos não serão considerados para fins de avaliação.
+ */
+
 package view;
 
 import java.util.ArrayList;
@@ -9,7 +20,7 @@ import model.Noticia;
 
 
 /**
- * TableModel para uma tabela do consumo de uma resid�ncia.
+ * TableModel para uma tabela das avaliações
  * 
  * @author matth.sobral
  *
@@ -54,20 +65,20 @@ public class NoticiaTableModel extends AbstractTableModel
 	}
 
 	/**
-	 * Retorna o nome da coluna no �ndice especificado.
-	 * Este m�todo � usado pela JTable para saber o texto do cabe�alho.
+	 * Retorna o nome da coluna no índice especificado.
+	 * Este método é usado pela JTable para saber o texto do cabeçalho.
 	 *
 	 */
 	@Override
 	public String getColumnName(int columnIndex) {
-		// Retorna o conte�do do Array que possui o nome das colunas
-		// no �ndice especificado.
+		// Retorna o conteúdo do Array que possui o nome das colunas
+		// no índice especificado.
 		return colunas[columnIndex];
 	};
 
 	/**
 	 *  Retorna a classe dos elementos da coluna especificada.
-	 * Este m�todo � usado pela JTable na hora de definir o editor da c�lula.
+	 * Este método é usado pela JTable na hora de definir o editor da célula.
 	 *
 	 */
 	@Override
@@ -89,8 +100,8 @@ public class NoticiaTableModel extends AbstractTableModel
 	}
 	
 	/**
-	 * Retorna o valor da c�lula especificada
-	 * pelos �ndices da linha e da coluna.
+	 * Retorna o valor da célula especificada
+	 * pelos índices da linha e da coluna.
 	 * 
 	 */
 	@Override
@@ -99,8 +110,8 @@ public class NoticiaTableModel extends AbstractTableModel
 		Noticia consumo = linhas.get(rowIndex);
 
 		// Retorna o campo referente a coluna especificada.
-		// Aqui � feito um switch para verificar qual � a coluna
-		// e retornar o campo adequado. As colunas s�o as mesmas
+		// Aqui é feito um switch para verificar qual é a coluna
+		// e retornar o campo adequado. As colunas são as mesmas
 		// que foram especificadas no array "colunas".
 		switch (columnIndex) 
 		{
@@ -118,11 +129,11 @@ public class NoticiaTableModel extends AbstractTableModel
 	}
 
 	/**
-	 * Retorna um valor booleano que define se a c�lula em quest�o
-	 * pode ser editada ou n�o.
-	 * Este m�todo � utilizado pela JTable na hora de definir o editor da c�lula.
-	 * Neste caso, estar� sempre retornando false, n�o permitindo que nenhuma
-	 * c�lula seja editada.
+	 * Retorna um valor booleano que define se a célula em questão
+	 * pode ser editada ou não.
+	 * Este método é utilizado pela JTable na hora de definir o editor da célula.
+	 * Neste caso, estará sempre retornando false, não permitindo que nenhuma
+	 * célula seja editada.
 	 */
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) 
@@ -131,7 +142,7 @@ public class NoticiaTableModel extends AbstractTableModel
 	}
 
 	/**
-	 * Adiciona uma lista de s�cios ao final dos registros.
+	 * Adiciona uma lista de sócios ao final dos registros.
 	 */
 	public void setListaDeNoticias(List<Noticia> noticia)
 	{
@@ -143,8 +154,8 @@ public class NoticiaTableModel extends AbstractTableModel
 		
 		linhas = noticia;
 
-		// Reporta a mudan�a. O JTable recebe a notifica��o
-		// e se redesenha permitindo que a atualiza��o seja visualizada.
+		// Reporta a mudança. O JTable recebe a notificação
+		// e se redesenha permitindo que a atualização seja visualizada.
 		fireTableRowsInserted(noticia.size(), getRowCount() - 1);
 	}
 }

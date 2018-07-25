@@ -1,13 +1,12 @@
-
 /*
-Autor: Francisco Tito Silva Santos Pereira - 16111203 e Matheus Sobral Oliveira - 16111189
+Autores: Francisco Tito Silva Santos Pereira - 16111203 e Matheus Sobral Oliveira - 16111189
 Componente Curricular: MI - Conectividade e Concorrência
 Concluido em: 24/07/2018
-Declaro que este código foi elaborado por mim de forma individual e não contém nenhum
+Declaramos que este código foi elaborado por nós de forma "individual" e não contém nenhum
 trecho de código de outro colega ou de outro autor, tais como provindos de livros e
 apostilas, e páginas ou documentos eletrônicos da Internet. Qualquer trecho de código
-de outra autoria que não a minha está destacado com uma citação para o autor e a fonte
-do código, e estou ciente que estes trechos não serão considerados para fins de avaliação.
+de outra autoria que não a nossa está destacado com uma citação para o autor e a fonte
+do código, e estamos ciente que estes trechos não serão considerados para fins de avaliação.
  */
 
 package controller;
@@ -39,8 +38,9 @@ import util.EmailSender;
 
 public class Controller extends UnicastRemoteObject implements ISiteNoticia
 {
-	private static final long serialVersionUID = -6386698164507342395L;
-	private static double MAIORIA = 3.33;
+	//Declaração de variáveis
+	private static final long serialVersionUID = -6386698164507342395L; //versão do serial
+	private static double MAIORIA = 3.33; // A maioria
 	private ExecutorService executor;
 	private Configuracao configuracao;
 	private BaseDeDados baseDados;
@@ -51,25 +51,25 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 
 
 	public Controller(String pathDados) throws AlreadyBoundException, IOException, InterruptedException {
-		executor = Executors.newCachedThreadPool();
-		configuracao = new Configuracao();
-		baseDados = new BaseDeDados(pathDados);
-		timeout = Integer.parseInt(configuracao.getConfiguracao("timeout"));
-		this.destinatario = String.valueOf(configuracao.getConfiguracao("entidade"));
-		semaforoNoticias = new Semaphore(0);
-		this.alteraTimeOut();
-		this.serverRMI();
+		executor = Executors.newCachedThreadPool(); //Criação de um objeto thread
+		configuracao = new Configuracao(); //objeto configuração
+		baseDados = new BaseDeDados(pathDados); //Base de dados é onde os dados estão armazenados
+		timeout = Integer.parseInt(configuracao.getConfiguracao("timeout")); // Pega o timeout a partir do arquivo
+		this.destinatario = String.valueOf(configuracao.getConfiguracao("entidade")); //Pega o destinatário a partir do arquivo
+		semaforoNoticias = new Semaphore(0); //Objeto semáforo
+		this.alteraTimeOut(); // Altera o timeout
+		this.serverRMI(); //Servidor RMI
 	}
 
 
-	private void serverRMI() throws IOException, AlreadyBoundException, InterruptedException // Inicia o servi�o RMI
+	private void serverRMI() throws IOException, AlreadyBoundException, InterruptedException // Inicia o servidor RMI
 	{
-		this.porta = this.configuracao.outrosServidores().get(0).getPorta();
-		Registry registry = LocateRegistry.createRegistry(this.porta);
-		registry.bind("SiteNoticia",this);
+		this.porta = this.configuracao.outrosServidores().get(0).getPorta(); // Pega a porta rmi a partir do banco de dados
+		Registry registry = LocateRegistry.createRegistry(this.porta); //Cria um novo registro
+		registry.bind("SiteNoticia",this); //"DNS" do RMI
 	}
 
-	private void alteraTimeOut() throws IOException 
+	private void alteraTimeOut() throws IOException  //Método que irá alterar o timeout do rmi para simular um sistema síncrono.
 	{
 		RMISocketFactory.setSocketFactory(new RMISocketFactory() {
 			public Socket createSocket(String host, int port)
@@ -77,7 +77,7 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 				Socket socket = new Socket();
 				socket.setSoTimeout(timeout);
 				socket.setSoLinger(false, 0);
-				socket.connect(new InetSocketAddress(host, port), 5000);
+				socket.connect(new InetSocketAddress(host, port), timeout); //Muda o timeout da conexão
 				return socket;
 			}
 
@@ -92,64 +92,64 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 	@Override
 	public double getMediaAvalicao(int idNoticia) throws RemoteException // Metodo que ira retornar o a avaliacao local de cada servidor sobre uma noticia
 	{
-		HashMap<Integer, Noticia> noticias = this.baseDados.getNoticias();
+		HashMap<Integer, Noticia> noticias = this.baseDados.getNoticias(); //Estrutura de dados que armazena as noticias
 		Noticia n = (Noticia) noticias.get(idNoticia);
-		return n.getMediaAvaliacoes();
+		return n.getMediaAvaliacoes(); //Retorna a avaliação local
 	}
 
 	@Override
 	public void definirAvaliacao(int idNoticia, double mediaFinal) throws RemoteException // Metodo que ira dizer qual o resultado final de uma noticia
 	{ 
-		HashMap<Integer, Noticia> noticias = this.baseDados.getNoticias();
+		HashMap<Integer, Noticia> noticias = this.baseDados.getNoticias(); //Estrutura de dados que armazena as noticias
 		Noticia n = (Noticia) noticias.get(idNoticia);
-		n.setMediaAvaliacoes(mediaFinal);
-		atualizarInformacoes();
+		n.setMediaAvaliacoes(mediaFinal); //modifica a média local pela media final definida pelo consenso
+		atualizarInformacoes(); //Atualiza as informações
 	}
 
 
 	@Override
-	public void consenso(int idNoticia, List<ISiteNoticia> servidores) throws RemoteException
+	public void consenso(int idNoticia, List<ISiteNoticia> servidores) throws RemoteException //Método que realiza o consenso
 	{
+		//Variáveis
 		double somatorioMedias = 0;
 		double avaliacaoMedia = 0;
 		boolean fake= false;
 
-		for (ISiteNoticia site : servidores)
+		for (ISiteNoticia site : servidores) //Para cada servidor, ele irá pegar a média local
 			somatorioMedias += site.getMediaAvalicao(idNoticia);
 
-		avaliacaoMedia = (double) somatorioMedias / servidores.size();
+		avaliacaoMedia = (double) somatorioMedias / servidores.size(); // Calcula a média das avaliações
 
-		if(avaliacaoMedia >= MAIORIA)
+		if(avaliacaoMedia >= MAIORIA) //Caso a média das avaliações supere 3,33 a notícia é considerada verdadeira.
+			// Pelo algoritmo é definido que caso 2/3 das avaliações sejam positivas, a noticia é considerada verdadeira
 			for(ISiteNoticia site : servidores)
-				site.definirAvaliacao(idNoticia, 5); // Foi decido que a not�cia � verdadeira
-		else {
+				site.definirAvaliacao(idNoticia, 5); // Foi decido que a notícia é verdadeira, e substitui a média da avaliação para 5
+		else { //Caso contrário
 			for (ISiteNoticia site : servidores) {
-				site.definirAvaliacao(idNoticia, 1);
+				site.definirAvaliacao(idNoticia, 1); //Define que a noticia é falsa, e substitui a média da avaliação para 1
 				fake = true;
 
 			}
 
 		}
-
-		
-		System.out.println("A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + " foi considerada " + baseDados.getNoticias().get(idNoticia).oldIsFake());
-		if(fake && !baseDados.getNoticias().get(idNoticia).reportado()) {
+		if(fake && !baseDados.getNoticias().get(idNoticia).reportado()) { //Caso a noticia seja falsa e ainda não tenha sido reportada
 			System.out.println("A noticia é fake, reportando as autoridades agora...");
+			//Envia um email para as autoridades
 			EmailSender.send("Foi Reportada uma noticia FAKE", destinatario, "A noticia " + baseDados.getNoticias().get(idNoticia).getTitulo() + "foi considerada fake");
 			for(ISiteNoticia site : servidores){
-				site.emailEnviado(idNoticia);
+				site.emailEnviado(idNoticia); //Diz para os outros servidores que aquela noticia foi reportada
 			}
 		}
 	}
 
 	@Override
 	public void emailEnviado(int idNoticia) throws RemoteException {
-		baseDados.getNoticias().get(idNoticia).reportar();
+		baseDados.getNoticias().get(idNoticia).reportar(); //Verifica se uma noticia foi enviada
 	}
 
 
 
-	public Noticia[] listarNoticias()
+	public Noticia[] listarNoticias() //Método que lista todas as noticias do banco de dados na tela
 	{
 		Noticia[] noticias = new Noticia[baseDados.getNoticias().size()];
 
@@ -161,38 +161,38 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 		return noticias;
 	}
 
-	public void addAvaliacao(Noticia noticia, int avaliacao)
+	public void addAvaliacao(Noticia noticia, int avaliacao) //Método que adiciona uma avaliação para uma determinada noticia
 	{
-		noticia.addAvaliacao(avaliacao);
-		atualizarInformacoes();
+		noticia.addAvaliacao(avaliacao); //Adiciona uma avaliação
+		atualizarInformacoes(); //Atualiza as informações
 
 		if(noticia.oldIsFake() != noticia.isFake()) // So executa o processo de consenso se a avaliacao sobre a noticia mudou
-			iniciarConsenso(noticia);
+			iniciarConsenso(noticia); //Inicia o processo de consenso
 	}
 
-	private void iniciarConsenso(Noticia noticia)
+	private void iniciarConsenso(Noticia noticia) // Método que realiza o processo de consenso
 	{
-		Consenso consenso = new Consenso(noticia, configuracao.outrosServidores());
-		consenso.setEventoPosConsenso(() -> atualizarInformacoes());
-		executor.execute(() -> {
+		Consenso consenso = new Consenso(noticia, configuracao.outrosServidores()); //Cria um objeto de consenso que contem a noticia e os servidores envolvidos
+		consenso.setEventoPosConsenso(() -> atualizarInformacoes()); //Seta o evento após o consenso
+		executor.execute(() -> { // Inicia uma nova thread para aquele consenso
 			try 
 			{
-				consenso.iniciarConsenso();
+				consenso.iniciarConsenso(); //Inicia o consenso
 			}
 			catch (Exception e)
 			{
 				e.printStackTrace();
 			}
-		}); // Inicia um thread para iniciar o processo de consenso
+		});
 	}
 
-	private void atualizarInformacoes()
+	private void atualizarInformacoes() //Atualiza as informações
 	{
-		baseDados.persistirDados();
+		baseDados.persistirDados(); //Salva os dados
 		semaforoNoticias.release();
 	}
 
-	public List<Noticia> getListaNoticias()
+	public List<Noticia> getListaNoticias() //Método que retorna todas as noticias
 	{
 		ArrayList<Noticia> noticias = new ArrayList<>();
 
@@ -202,7 +202,7 @@ public class Controller extends UnicastRemoteObject implements ISiteNoticia
 		return noticias;
 	}
 
-	public void aguardarAtualizacao()
+	public void aguardarAtualizacao() //Método que informa o usuário que está aguardando atualizações
 	{
 		try
 		{

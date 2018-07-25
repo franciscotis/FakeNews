@@ -1,5 +1,5 @@
 # Lista de IPs e portas do servidor
 # Ao inserir uma nova consfiguração, certifique-se que não há espaço entre os dois pontos e o valor
-server:localhost;8006
-server:localhost;15715
 server:localhost;8005
+server:192.168.43.32;15715
+server:192.168.43.32;8006
